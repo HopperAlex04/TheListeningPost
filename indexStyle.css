@@ -10,7 +10,6 @@ body {
 }
 
 .column-left,
-.column-center,
 .column-right {
     flex: 1;
     min-width: 0;
@@ -18,7 +17,17 @@ body {
     overflow-y: auto;
     padding: 1.5rem 2rem;
     box-sizing: border-box;
-    background: #1a1a1a;
+    background: #2a1e1e;
+}
+
+.column-center {
+    flex: 2;
+    min-width: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 1.5rem 2rem;
+    box-sizing: border-box;
+    background: #4d3827;
 }
 
 .column-center {
@@ -38,6 +47,14 @@ body {
     box-sizing: border-box;
 }
 
+#output {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
+    min-height: 100%;
+}
+
 .chat-input {
     flex-shrink: 0;
     width: 100%;
@@ -47,6 +64,14 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+}
+
+.name-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+    font-family: inherit;
 }
 
 .msg-input {
@@ -61,7 +86,7 @@ body {
 }
 
 .message {
-    width: 100%;
+    max-width: 85%;
     padding: 0.75rem 1rem;
     margin-bottom: 0.5rem;
     border: 1px solid #444;
@@ -70,4 +95,8 @@ body {
     box-sizing: border-box;
     white-space: pre-wrap;
     line-height: 1.5;
+}
+
+.message--own {
+    align-self: flex-end;
 }
