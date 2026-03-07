@@ -6,6 +6,43 @@ var msgInput = document.getElementById('msg');
 var output = document.getElementById('output');
 var submitBtn = document.getElementById('submit');
 
+// WebSocket: connect to server (must be served over http, not file://)
+var ws = null;
+var wsUrl = 'ws://' + window.location.hostname + ':8080';
+
+function connectWebSocket() {
+    try {
+        ws = new WebSocket(wsUrl);
+        ws.onmessage = async function (event) {
+            var data;
+            if (event.data instanceof Blob) {
+                data = await event.data.text();
+            } else {
+                data = typeof event.data === 'string' ? event.data : String(event.data);
+            }
+            var msg;
+            try {
+                msg = JSON.parse(data);
+            } catch (e) {
+                console.warn('Invalid message format:', data);
+                return;
+            }
+            if (!msg || typeof msg.text !== 'string') return;
+            if (messages.length >= MAX_MESSAGES) messages.shift();
+            messages.push({ text: msg.text, name: (msg.name && typeof msg.name === 'string') ? msg.name : '' });
+            renderMessages();
+            output.parentElement.scrollTop = output.parentElement.scrollHeight;
+        };
+        ws.onclose = function () {
+            ws = null;
+        };
+    } catch (e) {
+        console.warn('WebSocket connect failed:', e);
+    }
+}
+
+connectWebSocket();
+
 function renderMessages() {
     var currentName = nameInput.value.trim();
     output.innerHTML = '';
@@ -20,16 +57,26 @@ function renderMessages() {
     });
 }
 
+function addAndRender(msg) {
+    if (messages.length >= MAX_MESSAGES) messages.shift();
+    messages.push(msg);
+    renderMessages();
+    msgInput.value = '';
+    output.parentElement.scrollTop = output.parentElement.scrollHeight;
+}
+
 submitBtn.addEventListener('click', function () {
     var text = msgInput.value.trim();
     if (!text) return;
     var name = nameInput.value.trim();
-    if (messages.length >= MAX_MESSAGES) {
-        messages.shift();
+    var msg = { text: text, name: name };
+
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(msg));
+        msgInput.value = '';
+        // Message will appear when server broadcasts it back
+    } else {
+        addAndRender(msg);
     }
-    messages.push({ text: text, name: name });
-    renderMessages();
-    msgInput.value = '';
-    output.parentElement.scrollTop = output.parentElement.scrollHeight;
 });
 

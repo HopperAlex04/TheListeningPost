@@ -1,12 +1,25 @@
 # The Listening Post
 
-A minimal, front-end chat-style UI. Messages are shown in a central column with an optional name; the layout is built so a backend and real-time messaging can be added later.
+A minimal, front-end chat-style UI. Messages are shown in a central column with an optional name. Real-time messaging is provided via WebSockets.
 
 ## Run it
 
-Open `index.html` in a browser (e.g. double-click or `file://`). No build step or server required for the current UI.
+1. **Start the WebSocket server** (required for live messaging):
+   ```bash
+   npm install
+   npm start
+   ```
+   The server runs on port 8080. The client connects using the page’s host (`ws://<host>:8080`), so you can test from other devices on the same network (e.g. phone) by opening `http://<this-PC-IP>:3000` and ensuring the firewall allows ports 3000 and 8080.
 
-For local hosting later, use any static file server (e.g. `python -m http.server`, `npx serve`).
+2. **Serve the front end** — The page must be served over HTTP (not `file://`) for WebSockets to work:
+   ```bash
+   npx serve
+   ```
+   Or: `python -m http.server 3000`, then open `http://localhost:3000`.
+
+3. Open the site in a browser. Messages you send are broadcast to all connected clients in real time.
+
+**Offline mode:** If the WebSocket server is not running, messages still appear locally when you submit (they just won’t sync to other clients).
 
 ## Current features
 
@@ -18,21 +31,31 @@ For local hosting later, use any static file server (e.g. `python -m http.server
 
 ## Tech
 
-- Plain HTML, CSS, and JavaScript.
-- No frameworks. Messages live in an in-memory array; the UI is structured so a backend can later feed the same list (e.g. via WebSockets) and the same render path can be used.
+- Plain HTML, CSS, and JavaScript on the front end.
+- Node.js WebSocket server (`ws` package) for real-time message broadcast.
+- Messages are sent as JSON `{ text, name }` over the WebSocket; the server echoes each message to all connected clients.
 
 ## Project structure
 
 ```
 index.html      — Page structure and chat markup
 indexStyle.css  — Layout and styles
-app.js          — Message queue, render logic, submit handler
-todoIdeas.txt   — Planned features (welcome text, rules, backend, hosting, sockets)
+app.js          — Message queue, render logic, WebSocket client, submit handler
+server.js       — WebSocket server (broadcasts messages to all clients)
+package.json    — Node dependencies (ws)
 ```
+
+## How WebSockets work (basic flow)
+
+1. **Connection** — On load, `app.js` opens a WebSocket to `ws://<current host>:8080` (so it works from other devices when you use the PC’s IP in the URL).
+2. **Send** — When you click Submit, the client sends `{ text, name }` as JSON over the socket.
+3. **Broadcast** — The server receives the message and sends it to every connected client (including the sender).
+4. **Receive** — Each client's `onmessage` handler reads the message (handling Blob or string), parses JSON (with validation), appends to the message list, and re-renders.
+5. **Offline** — If the server is down, messages are added locally only (no sync to other clients).
 
 ## Roadmap
 
-See `todoIdeas.txt` for planned items (welcome text, rules, backend, local hosting, sockets). The front end is designed so the backend can be “hooked up” without reworking the UI.
+Planned items: welcome text (left column), rules (right column), more artsy content. WebSocket support is now implemented.
 
 ## Changelog
 

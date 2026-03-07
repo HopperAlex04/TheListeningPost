@@ -1,0 +1,11 @@
+{
+  "name": "the-listening-post",
+  "version": "0.1.0",
+  "description": "A minimal chat-style UI with WebSocket messaging",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

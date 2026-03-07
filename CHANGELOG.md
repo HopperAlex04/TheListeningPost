@@ -17,6 +17,24 @@ All notable changes to The Listening Post so far.
 
 ---
 
+## WebSocket messaging
+
+### Added
+
+- **WebSocket server** (`server.js`) — Node.js server using the `ws` package. Listens on port 8080 and broadcasts every incoming message to all connected clients.
+- **WebSocket client** (`app.js`) — Connects to `ws://<host>:8080` on page load (host from `window.location.hostname`, so it works from other devices). Sends `{ text, name }` as JSON when the user submits; receives broadcast messages and appends them to the message list.
+- **Offline fallback** — If the server is not running, submitted messages still appear locally (no sync to other clients).
+- **package.json** — Adds `ws` dependency and `npm start` script to run the server.
+- **Robust message handling** — Client handles WebSocket messages delivered as Blob or string; defensive JSON parse and validation so invalid payloads don’t break the UI.
+
+### How it works
+
+1. Run `npm install` and `npm start` to start the WebSocket server.
+2. Serve the front end over HTTP (e.g. `npx serve` or `python -m http.server`).
+3. Open the site in one or more browser tabs/windows. Messages sent from any client are broadcast to all and displayed in real time.
+
+---
+
 ## Initial chat UI
 
 ### Layout
