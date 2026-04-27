@@ -9,7 +9,7 @@ A minimal, front-end chat-style UI. Messages are shown in a central column with 
    npm install
    npm start
    ```
-   The server runs on port 8080. The client connects using the page’s host (`ws://<host>:8080`), so you can test from other devices on the same network (e.g. phone) by opening `http://<this-PC-IP>:3000` and ensuring the firewall allows ports 3000 and 8080.
+   The server runs on port 8080 by default (or `PORT` if provided by your host platform). The client connects using the same host and protocol as the page (`ws://` on HTTP, `wss://` on HTTPS), so you can test from other devices on the same network by opening `http://<this-PC-IP>:3000` and ensuring the firewall allows that port.
 
 2. **Serve the front end** — The page must be served over HTTP (not `file://`) for WebSockets to work:
    ```bash
@@ -47,11 +47,21 @@ package.json    — Node dependencies (ws)
 
 ## How WebSockets work (basic flow)
 
-1. **Connection** — On load, `app.js` opens a WebSocket to `ws://<current host>:8080` (so it works from other devices when you use the PC’s IP in the URL).
+1. **Connection** — On load, `app.js` opens a WebSocket to the current page host (`ws://<host>` on HTTP or `wss://<host>` on HTTPS).
 2. **Send** — When you click Submit, the client sends `{ text, name }` as JSON over the socket.
 3. **Broadcast** — The server receives the message and sends it to every connected client (including the sender).
 4. **Receive** — Each client's `onmessage` handler reads the message (handling Blob or string), parses JSON (with validation), appends to the message list, and re-renders.
 5. **Offline** — If the server is down, messages are added locally only (no sync to other clients).
+
+## Render deployment note (single instance)
+
+For now, run this service as a **single instance** on Render.
+
+- The WebSocket server currently broadcasts in memory to clients connected to that same process.
+- With multiple instances, users can be split across instances and may not see each other's messages.
+- In Render service settings, set instance count to `1` (and keep production on `master` if desired).
+
+This is expected until a shared pub/sub backend (such as Redis) is added.
 
 ## Roadmap
 
