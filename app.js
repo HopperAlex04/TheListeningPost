@@ -8,7 +8,8 @@ var submitBtn = document.getElementById('submit');
 
 // WebSocket: connect to server (must be served over http, not file://)
 var ws = null;
-var wsUrl = 'ws://' + window.location.hostname + ':8080';
+var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+var wsUrl = wsProtocol + '//' + window.location.host;
 
 function connectWebSocket() {
     try {
